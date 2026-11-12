@@ -120,3 +120,7 @@ body.mini #mini-song{display:block;grid-row:1;grid-column:1;margin:0;min-height:
 #editor #assignments legend select{display:inline-block;width:auto;min-height:0;box-sizing:border-box;height:24px;padding:0 6px;margin:0 0 0 12px;font-size:13px;line-height:normal;vertical-align:middle;border-radius:4px}
 #assignments label[hidden]{display:none}
 #editor .check input{min-height:0;padding:0;margin:0 6px 0 0;vertical-align:middle}
+/* Mini Mode: keep switch height; the border and a smaller badge carry the footswitch info. */
+body.mini .patch .footswitch{display:none}
+body.mini .patch .slot-badge{top:6px;right:6px;font-size:18px;padding:2px 6px}
+body.mini .patch:has(.slot-badge)>:not(.slot-badge){padding-right:32px}
