@@ -63,6 +63,16 @@ aside>.row,aside>label,aside>small{flex-shrink:0}
   aside nav{flex:0 1 auto;max-height:180px}
 }
 
+/* Same bank as Switch 1: reachable on the GP-200 footswitches. CTRL: an effect toggle, not a patch. Text labels carry the meaning too. */
+.patch.same-bank{border:2px dashed var(--green)}
+.patch.ctrl{border-left:6px solid #e0b25c}
+/* Same bank and slot letter matches the switch number (1=A … 4=D): solid. Otherwise a badge shows the real GP-200 footswitch. */
+.patch.same-pos{border-style:solid}
+.patch{position:relative}
+.patch:has(.slot-badge)>:not(.slot-badge){padding-right:64px}
+.patch .slot-badge{position:absolute;top:12px;right:12px;font-size:30px;font-weight:700;line-height:1;padding:6px 12px;border:2px solid var(--green);border-radius:6px;color:var(--green)}
+.patch.active .slot-badge{border-color:#162014;color:#162014}
+
 /* One compact search field per switch, with bounded results only while searching. */
 #patch-summary{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:var(--muted);max-height:110px;overflow:auto;flex-shrink:0}
 .patch-import{flex-shrink:0;text-align:center;margin-top:10px}
