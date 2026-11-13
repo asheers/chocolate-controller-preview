@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Follower test</title>
+<style>
+body{margin:0;padding:24px;background:#141715;color:#f3f0e7;font-family:Helvetica,Arial,sans-serif}
+#message{font-size:64px;font-weight:bold;color:#c1ed83;margin:40px 0;word-wrap:break-word}
+#status{font-size:20px;color:#a7b3a9}
+.error{color:#ffb4a6!important}
+</style></head><body>
+<h1>Chocolate follower test</h1>
+<div id="message">Waiting for a message…</div>
+<div id="status">Starting…</div>
+<script>
+// Deliberately ES5 + XHR polling: this page must run on iOS 9 Safari (no modules, arrows or fetch).
+var TOPIC = 'choc-follow-ae3bfd70afbb', since = 'all', checks = 0;
+function show(id, text, isError) { var el = document.getElementById(id); el.textContent = text; el.className = isError ? 'error' : ''; }
+function poll() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://ntfy.sh/' + TOPIC + '/json?poll=1&since=' + since + '&t=' + new Date().getTime());
+  xhr.timeout = 8000;
+  xhr.onload = function () {
+    checks++;
+    if (xhr.status !== 200) { show('status', 'Check ' + checks + ': server replied ' + xhr.status, true); return; }
+    var lines = xhr.responseText.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      if (!lines[i]) continue;
+      try { var m = JSON.parse(lines[i]); } catch (e) { continue; }
+      if (m.event === 'message') { show('message', m.message); since = m.id; }
+    }
+    show('status', 'Connected ✓ · check ' + checks + ' at ' + new Date().toLocaleTimeString());
+  };
+  xhr.onerror = function () { show('status', 'Cannot reach ntfy.sh (blocked or offline) · ' + new Date().toLocaleTimeString(), true); };
+  xhr.ontimeout = xhr.onerror;
+  xhr.send();
+}
+poll();
+setInterval(poll, 2000);
+</script>
+</body></html>
