@@ -7,33 +7,28 @@ body{margin:0;padding:24px;background:#141715;color:#f3f0e7;font-family:Helvetic
 #status{font-size:20px;color:#a7b3a9}
 .error{color:#ffb4a6!important}
 </style></head><body>
-<h1>Chocolate follower test</h1>
+<h1>Chocolate follower test v2</h1>
 <div id="message">Waiting for a message…</div>
 <div id="status">Starting…</div>
 <script>
-// Deliberately ES5 + XHR polling: this page must run on iOS 9 Safari (no modules, arrows or fetch).
-var TOPIC = 'choc-follow-ae3bfd70afbb', since = 'all', checks = 0;
+// Deliberately ES5: this page must run on iOS 9 Safari. One long-lived SSE stream instead of polling,
+// because ntfy.sh rate-limits per public IP (shared with every device on the same Wi-Fi).
+var TOPIC = 'choc-follow-ae3bfd70afbb', received = 0;
 function show(id, text, isError) { var el = document.getElementById(id); el.textContent = text; el.className = isError ? 'error' : ''; }
-function poll() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'https://ntfy.sh/' + TOPIC + '/json?poll=1&since=' + since + '&t=' + new Date().getTime());
-  xhr.timeout = 8000;
-  xhr.onload = function () {
-    checks++;
-    if (xhr.status !== 200) { show('status', 'Check ' + checks + ': server replied ' + xhr.status, true); return; }
-    var lines = xhr.responseText.split('\n');
-    for (var i = 0; i < lines.length; i++) {
-      if (!lines[i]) continue;
-      try { var m = JSON.parse(lines[i]); } catch (e) { continue; }
-      if (m.event === 'message') { show('message', m.message); since = m.id; }
-    }
-    show('status', 'Connected ✓ · check ' + checks + ' at ' + new Date().toLocaleTimeString());
-  };
-  xhr.onerror = function () { show('status', 'Cannot reach ntfy.sh (blocked or offline) · ' + new Date().toLocaleTimeString(), true); };
-  xhr.ontimeout = xhr.onerror;
-  xhr.send();
+function time() { return new Date().toLocaleTimeString(); }
+function handle(e) {
+  var m; try { m = JSON.parse(e.data); } catch (err) { return; }
+  if (m.event === 'message') { received++; show('message', m.message); show('status', 'Live ✓ · ' + received + ' received · last at ' + time()); }
+  else if (m.event === 'keepalive' || m.event === 'open') show('status', 'Live ✓ · ' + received + ' received · still connected at ' + time());
 }
-poll();
-setInterval(poll, 2000);
+if (!window.EventSource) show('status', 'This browser has no EventSource', true);
+else {
+  var source = new EventSource('https://ntfy.sh/' + TOPIC + '/sse');
+  source.onopen = function () { show('status', 'Live ✓ · connected at ' + time()); };
+  source.onmessage = handle;
+  source.addEventListener('open', handle);
+  source.addEventListener('keepalive', handle);
+  source.onerror = function () { show('status', 'Connection lost, retrying… · ' + time(), true); };
+}
 </script>
 </body></html>
