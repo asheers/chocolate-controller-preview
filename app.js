@@ -116,6 +116,6 @@ if(build.channel!=='LIVE'){document.title=build.channel+' · '+document.title;$(
 if(build.channel!=='DEV'&&'serviceWorker' in navigator)navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
   const offer=()=>{if(reg.waiting&&navigator.serviceWorker.controller)$('update').hidden=false;};
   offer();reg.onupdatefound=()=>{reg.installing.onstatechange=offer;};
-  $('update').onclick=()=>{if(!confirm('Reload to install the update? MIDI will disconnect and Simulation will be on until you reconnect. Songs are kept.'))return;navigator.serviceWorker.oncontrollerchange=()=>location.reload();reg.waiting.postMessage('activate');};
+  $('update').onclick=()=>{if(!confirm('Reload to install the update? MIDI will disconnect until you reconnect. Songs are kept.'))return;navigator.serviceWorker.oncontrollerchange=()=>location.reload();reg.waiting.postMessage('activate');};
 }).catch(error=>log('Offline app cache unavailable: '+error.message));
 devices();render();
